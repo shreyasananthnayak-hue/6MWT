@@ -1,8 +1,8 @@
-name: Deploy to GitHub Pages
+name: Deploy Angular to GitHub Pages
 
 on:
   push:
-    branches: ["main"] 
+    branches: ["main"]
 
 permissions:
   contents: read
@@ -10,20 +10,35 @@ permissions:
   id-token: write
 
 jobs:
-  deploy:
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build Angular
+        run: npx ng build --configuration production --base-href /6MWT/
+
+      # This step helps us debug by showing exactly where the files are
+      - name: Check build output
+        run: ls -R dist/
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: '.' # This tells GitHub to upload everything in your folder
-
+          # In modern Angular, it's often just dist/[project-name]
+          # Check your terminal logs for 'Check build output' to confirm
+          path: dist/walk_calc//browser
+          
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
